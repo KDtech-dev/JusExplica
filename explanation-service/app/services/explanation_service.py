@@ -17,9 +17,6 @@ UNKNOWN_EXPLANATION = (
     "no sistema do tribunal para obter mais informações."
 )
 
-
-# Cada regra contém as expressões que podem identificar uma movimentação
-# e a explicação correspondente.
 RULES = [
     {
         "name": "expedicao_mandado",
@@ -128,13 +125,6 @@ RULES = [
 
 
 def normalize_text(value: str) -> str:
-    """
-    Padroniza o texto para facilitar a comparação de expressões.
-
-    Exemplo:
-        '  CONCLUSOS para DECISÃO  '
-        -> 'conclusos para decisao'
-    """
     normalized = unicodedata.normalize("NFKD", value.casefold())
 
     without_accents = "".join(
@@ -142,8 +132,7 @@ def normalize_text(value: str) -> str:
         for character in normalized
         if not unicodedata.combining(character)
     )
-
-    # Trata pontuação e espaços consecutivos.
+    
     normalized_spaces = re.sub(
         r"[^\w]+",
         " ",
@@ -154,19 +143,13 @@ def normalize_text(value: str) -> str:
 
 
 def classify_movement(description: str) -> dict | None:
-    """
-    Identifica uma categoria usando expressões conhecidas.
 
-    Retorna a regra identificada ou None quando não encontra
-    uma correspondência.
-    """
     normalized_description = normalize_text(description)
 
     for rule in RULES:
         for phrase in rule["phrases"]:
             normalized_phrase = normalize_text(phrase)
 
-            # A expressão precisa corresponder a palavras completas.
             pattern = (
                 rf"(?<!\w){re.escape(normalized_phrase)}(?!\w)"
             )
