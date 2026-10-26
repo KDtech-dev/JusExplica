@@ -1,13 +1,17 @@
 from fastapi import FastAPI
 
+from app.api.router import api_router
+from app.core.config import settings
+
+
 app = FastAPI(
-    title="JusExplica - Explanation Service",
-    description="Serviço responsável pela futura interpretação de movimentações judiciais.",
-    version="0.1.0",
+    title=settings.service_name,
+    description=settings.service_description,
+    version=settings.service_version,
 )
 
 
-@app.get("/")
+@app.get("/", tags=["Health"])
 def home():
     return {
         "success": True,
@@ -15,10 +19,4 @@ def home():
     }
 
 
-@app.get("/health")
-def health_check():
-    return {
-        "success": True,
-        "service": "explanation-service",
-        "status": "online",
-    }
+app.include_router(api_router)

@@ -228,6 +228,9 @@ A documentação complementar está disponível na pasta `docs/`.
 | [`contrato-api.md`](docs/contrato-api.md) | Contrato de comunicação entre Laravel e Python |
 | [`requisitos.md`](docs/requisitos.md) | Requisitos funcionais e não funcionais |
 | [`banco-de-dados.md`](docs/banco-de-dados.md) | Proposta inicial para a estrutura do banco de dados |
+| [`Serviço Python`](docs/servico-python.md) | Serviço de ações em python |
+
+
 
 Os documentos representam as definições e propostas atuais do projeto e podem ser atualizados conforme as decisões de implementação.
 

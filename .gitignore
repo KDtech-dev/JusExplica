@@ -1,0 +1,15 @@
+# Environment variables
+.env
+.env.*
+
+# Example environment configuration must remain versioned
+!.env.example
+
+# Python virtual environments
+.venv/
+venv/
+
+# Python generated files
+__pycache__/
+*.py[cod]
+.pytest_cache/
