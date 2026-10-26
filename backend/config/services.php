@@ -34,5 +34,11 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'python_explanation' => [
+    'url' => env(
+        'PYTHON_EXPLANATION_URL',
+        'http://127.0.0.1:8001'
+    ),
+],
 
 ];
