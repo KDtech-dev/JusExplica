@@ -2,15 +2,13 @@
 
 **JusExplica: a Justiça fala a sua língua!**
 
-O JusExplica é um projeto que busca tornar as informações processuais mais acessíveis, transformando informações jurídicas em explicações claras, simples e compreensíveis para qualquer pessoa.
+O JusExplica é um projeto que busca tornar as informações processuais mais acessíveis, transformando informações jurídicas em explicações claras, simples e compreensíveis.
 
-A proposta também contempla a geração de áudio, contribuindo para ampliar a acessibilidade e facilitar o acesso à informação jurídica.
+A proposta também contempla recursos de acessibilidade, como a geração de áudio, para facilitar o acesso à informação jurídica.
 
 > **Status:** Em desenvolvimento. As funcionalidades estão sendo implementadas progressivamente.
 
 ## Tecnologias
-
-O projeto utiliza tecnologias distintas para a interface, as regras de negócio e o processamento das explicações.
 
 | Camada | Tecnologias |
 |---|---|
@@ -18,35 +16,48 @@ O projeto utiliza tecnologias distintas para a interface, as regras de negócio 
 | Backend | PHP e Laravel |
 | Serviço de explicação | Python e FastAPI |
 | Servidor ASGI | Uvicorn |
+| Banco de dados | Configurado pelo Laravel |
 
-## Arquitetura do projeto
+## Arquitetura
 
-A arquitetura proposta divide a aplicação em três componentes principais:
+O projeto é organizado em três componentes principais:
 
 - **Frontend:** interface utilizada pelo usuário para acessar as funcionalidades do JusExplica.
 - **Backend:** responsável pelas regras de negócio, pelo gerenciamento das solicitações e pela comunicação entre os componentes.
-- **Serviço de explicação:** responsável pelo processamento das informações e pela geração de explicações em linguagem simples.
+- **Serviço de explicação:** responsável pelo processamento das informações e pela produção de explicações em linguagem simples.
 
-A geração de áudio será integrada conforme a implementação e a evolução do projeto.
+O fluxo de comunicação previsto é:
 
-### Estrutura de diretórios
+1. O usuário interage com a interface.
+2. O frontend envia a solicitação ao backend Laravel.
+3. O backend coordena o processamento com o serviço Python.
+4. O serviço Python processa as informações recebidas.
+5. O backend retorna o resultado ao frontend.
+6. O usuário consulta a explicação apresentada.
 
-A organização prevista para o repositório é:
+A geração de áudio e outras funcionalidades serão incorporadas conforme a evolução do projeto.
+
+## Estrutura do projeto
 
 ```text
 JusExplica/
-├── frontend/             # Interface da aplicação
-├── backend/              # API e regras de negócio
-├── explanation-service/  # Serviço de explicação em Python
-├── docs/                 # Documentação complementar
+├── frontend/                 # Interface Next.js
+├── backend/                  # API e regras de negócio Laravel
+├── explanation-service/      # Serviço de explicação em Python
+│   ├── app/
+│   ├── tests/
+│   ├── requirements.txt
+│   └── README.md
+├── docs/                     # Documentação do projeto
+├── .gitignore
 └── README.md
 ```
 
-A estrutura poderá ser ajustada conforme o desenvolvimento dos componentes.
+A estrutura interna dos componentes pode ser ampliada conforme o desenvolvimento.
 
 ## Pré-requisitos
 
-Antes de executar o projeto, instale as seguintes ferramentas:
+Antes de executar o projeto, instale:
 
 - [Git](https://git-scm.com/)
 - [Node.js e npm](https://nodejs.org/)
@@ -54,24 +65,38 @@ Antes de executar o projeto, instale as seguintes ferramentas:
 - [Composer](https://getcomposer.org/)
 - [Python 3](https://www.python.org/)
 - `pip`, gerenciador de pacotes do Python
-- Um banco de dados compatível com a configuração do Laravel.
+- Um sistema de banco de dados compatível com a configuração do Laravel.
 
-Alguns pré-requisitos serão necessários apenas para executar os componentes correspondentes. A disponibilidade dos serviços depende da implementação atual do projeto.
+Verifique as instalações:
+
+```bash
+git --version
+node --version
+npm --version
+php --version
+composer --version
+python3 --version
+python3 -m pip --version
+```
 
 ## Instalação e execução
 
+Os componentes são executados separadamente durante o desenvolvimento. Utilize um terminal para cada serviço.
+
 ### 1. Clonar o repositório
 
-Clone o repositório e acesse a pasta do projeto:
+Clone o repositório e entre na pasta do projeto:
 
 ```bash
 git clone git@github.com:KDtech-dev/JusExplica.git
 cd JusExplica
 ```
 
+O comando de clonagem acima utiliza SSH. Para utilizá-lo, configure uma chave SSH associada à sua conta do GitHub.
+
 ### 2. Serviço de explicação — Python
 
-Acesse o diretório do serviço:
+Entre na pasta do serviço:
 
 ```bash
 cd explanation-service
@@ -92,7 +117,8 @@ source .venv/bin/activate
 Instale as dependências:
 
 ```bash
-pip install -r requirements.txt
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 ```
 
 Inicie o servidor de desenvolvimento:
@@ -101,7 +127,7 @@ Inicie o servidor de desenvolvimento:
 uvicorn app.main:app --reload --port 8001
 ```
 
-Com o serviço em execução, os endereços disponíveis são:
+O serviço ficará disponível nos seguintes endereços:
 
 | Recurso | Endereço |
 |---|---|
@@ -116,14 +142,14 @@ Para sair do ambiente virtual:
 deactivate
 ```
 
-**Observação:** os comandos pressupõem que o arquivo `requirements.txt` e o módulo `app.main` estejam presentes no serviço.
+**Observação:** mantenha o serviço Python em execução enquanto testa funcionalidades que dependam dele.
 
 ### 3. Backend — Laravel
 
-Em outro terminal, retorne à raiz do projeto e acesse o backend:
+Abra outro terminal e acesse a raiz do projeto:
 
 ```bash
-cd backend
+cd ~/JusExplica/backend
 ```
 
 Instale as dependências:
@@ -144,15 +170,15 @@ Gere a chave da aplicação:
 php artisan key:generate
 ```
 
-Configure no arquivo `.env` as variáveis necessárias, incluindo as credenciais do banco de dados.
+Configure o arquivo `.env` com os dados necessários, incluindo as credenciais do banco de dados.
 
-Execute as migrações, caso estejam disponíveis e configuradas:
+Depois de configurar e preparar o banco, execute as migrações disponíveis:
 
 ```bash
 php artisan migrate
 ```
 
-Inicie o servidor:
+Inicie o servidor de desenvolvimento:
 
 ```bash
 php artisan serve
@@ -162,14 +188,14 @@ Por padrão, o backend ficará disponível em:
 
 http://127.0.0.1:8000
 
-**Observação:** as instruções pressupõem que o diretório `backend` contenha uma aplicação Laravel configurada.
+**Observação:** a execução completa depende da configuração do ambiente Laravel, do banco de dados e das integrações utilizadas pelo backend.
 
 ### 4. Frontend — Next.js
 
-Em outro terminal, acesse o diretório do frontend a partir da raiz do projeto:
+Abra outro terminal e acesse a pasta do frontend:
 
 ```bash
-cd frontend
+cd ~/JusExplica/frontend
 ```
 
 Instale as dependências:
@@ -188,26 +214,28 @@ Por padrão, a interface ficará disponível em:
 
 http://localhost:3000
 
-Configure a URL da API nas variáveis de ambiente utilizadas pelo frontend, de acordo com a configuração da aplicação.
+Configure a URL do backend nas variáveis de ambiente utilizadas pelo frontend, conforme a implementação da aplicação.
 
-**Observação:** as instruções pressupõem que o diretório `frontend` contenha uma aplicação Next.js configurada.
+**Observação:** a interface pode depender de endpoints do backend que ainda estejam em desenvolvimento.
 
-## Fluxo de funcionamento
+## Documentação
 
-O fluxo planejado para o JusExplica é:
+A documentação complementar está disponível na pasta `docs/`.
 
-1. O usuário acessa a interface da aplicação.
-2. O frontend envia uma solicitação ao backend.
-3. O backend coordena o processamento das informações com o serviço Python.
-4. O serviço de explicação processa as informações e produz uma explicação em linguagem simples.
-5. O backend disponibiliza o resultado ao frontend.
-6. O usuário consulta a explicação gerada.
+| Documento | Descrição |
+|---|---|
+| [`arquitetura.md`](docs/arquitetura.md) | Organização dos componentes e decisões arquiteturais |
+| [`contrato-api.md`](docs/contrato-api.md) | Contrato de comunicação entre Laravel e Python |
+| [`requisitos.md`](docs/requisitos.md) | Requisitos funcionais e não funcionais |
+| [`banco-de-dados.md`](docs/banco-de-dados.md) | Proposta inicial para a estrutura do banco de dados |
 
-A geração de áudio e outras funcionalidades serão incorporadas conforme o avanço do desenvolvimento.
+Os documentos representam as definições e propostas atuais do projeto e podem ser atualizados conforme as decisões de implementação.
 
 ## Desenvolvimento e contribuição
 
-O desenvolvimento utiliza branches específicas para organizar funcionalidades, correções e outras alterações. A integração de mudanças à branch principal é realizada por meio de Pull Requests.
+O desenvolvimento utiliza branches específicas para organizar funcionalidades, correções e alterações na documentação.
+
+A integração de mudanças à branch principal deve ser realizada por meio de Pull Requests.
 
 ### Proteção da branch principal
 
@@ -218,19 +246,19 @@ A branch `main` possui regras de proteção configuradas no GitHub:
 - **Require a pull request before merging:** exige um Pull Request para integrar alterações.
 - **Require conversation resolution:** exige a resolução das conversas de revisão antes do merge.
 
-Essas regras ajudam a preservar o histórico do projeto e a organizar as alterações.
+Essas regras ajudam a preservar o histórico do projeto e a organizar as revisões de código.
 
 ### Convenção de branches
 
-Utilize os seguintes prefixos para identificar o objetivo de cada branch:
+Utilize os seguintes prefixos:
 
 | Prefixo | Finalidade | Exemplo |
 |---|---|---|
 | `feature/` | Nova funcionalidade | `feature/explanation-service` |
 | `fix/` | Correção de erro | `fix/api-connection` |
-| `docs/` | Documentação | `docs/readme-project` |
-| `refactor/` | Refatoração | `refactor/explanation-service` |
-| `test/` | Testes | `test/python-service` |
+| `docs/` | Alteração na documentação | `docs/readme-project` |
+| `refactor/` | Refatoração de código | `refactor/explanation-service` |
+| `test/` | Criação ou atualização de testes | `test/python-service` |
 
 ### Fluxo de trabalho
 
@@ -247,14 +275,14 @@ git pull origin main
 git switch -c feature/nome-da-funcionalidade
 ```
 
-**3. Desenvolva e teste as alterações:**
+**3. Desenvolva e revise as alterações:**
 
 ```bash
 git status
 git diff
 ```
 
-Execute também os testes pertinentes aos componentes modificados.
+Execute os testes pertinentes aos componentes modificados.
 
 **4. Registre as alterações:**
 
@@ -271,9 +299,9 @@ git push -u origin feature/nome-da-funcionalidade
 
 **6. Abra um Pull Request:**
 
-No GitHub, crie um Pull Request da sua branch para a `main`. Descreva as alterações realizadas, os testes executados e os pontos relevantes para a revisão.
+No GitHub, crie um Pull Request da sua branch para `main`.
 
-Resolva as conversas de revisão pendentes antes de integrar as alterações.
+Descreva as alterações realizadas, os testes executados e os pontos relevantes para a revisão. Resolva as conversas pendentes antes de integrar as alterações.
 
 **7. Atualize a branch principal após o merge:**
 
@@ -302,6 +330,7 @@ O projeto adota a convenção [Conventional Commits](https://www.conventionalcom
 - Utilize mensagens de commit descritivas.
 - Teste as alterações antes de abrir um Pull Request.
 - Não envie arquivos `.env`, credenciais, tokens ou outras informações sensíveis ao repositório.
+- Mantenha o `.gitignore` configurado para excluir dependências instaladas, ambientes virtuais, arquivos gerados e configurações locais.
 - Atualize a documentação quando houver mudanças relevantes na instalação, configuração ou utilização dos serviços.
 - Evite operações de force push na branch principal.
 
@@ -312,7 +341,9 @@ O JusExplica busca:
 - Facilitar a compreensão de informações processuais.
 - Traduzir informações jurídicas para uma linguagem mais simples e acessível.
 - Tornar o acesso à informação jurídica mais inclusivo.
-- Ampliar as formas de consulta por meio de funcionalidades como a geração de áudio.
+- Ampliar as formas de consulta por meio de funcionalidades de acessibilidade, como a geração de áudio.
+
+As explicações têm finalidade informativa e não substituem a análise individualizada de um profissional do Direito.
 
 ## Repositório
 
@@ -322,4 +353,4 @@ O código-fonte e o histórico de desenvolvimento estão disponíveis no GitHub:
 
 ---
 
-Desenvolvido como um projeto de tecnologia voltado à acessibilidade e à compreensão da informação jurídica.
+Desenvolvido pela KDTech como um projeto de tecnologia voltado à acessibilidade e à compreensão da informação jurídica.
