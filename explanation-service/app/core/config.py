@@ -15,6 +15,9 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore",
     )
+    tpu_wsdl_url: str = (
+    "https://www.cnj.jus.br/sgt/sgt_ws.php?wsdl"
+)
 
 
 settings = Settings()
