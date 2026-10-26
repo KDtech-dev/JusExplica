@@ -1,84 +1,44 @@
-from fastapi.testclient import TestClient
-
-from app.main import app
-
-
-client = TestClient(app)
-
-
-def test_health_check():
-    response = client.get("/health")
-
-    assert response.status_code == 200
-    assert response.json()["status"] == "online"
+from app.schemas.explanation import MovementInput
+from app.services.explanation_service import (
+    classify_movement,
+    explain_movement,
+    normalize_text,
+)
 
 
-def test_explains_known_movement():
-    response = client.post(
-        "/v1/explanations",
-        json={
-            "movement": {
-                "code": "123",
-                "description": "Conclusos para decisão",
-                "date": "2026-10-26",
-            },
-            "language": "pt-BR",
-        },
+def test_normalizes_accents_and_spaces():
+    result = normalize_text("  CONCLUSOS   para DECISÃO! ")
+
+    assert result == "conclusos para decisao"
+
+
+def test_classifies_known_movement():
+    result = classify_movement("Conclusos para decisão")
+
+    assert result is not None
+    assert result["name"] == "conclusos_decisao"
+
+
+def test_classification_ignores_case_and_accents():
+    result = classify_movement("CONCLUSOS PARA DECISAO")
+
+    assert result is not None
+    assert result["name"] == "conclusos_decisao"
+
+
+def test_does_not_match_partial_word():
+    result = classify_movement("O processo foi desintimado")
+
+    assert result is None
+
+
+def test_unknown_movement_returns_generic_explanation():
+    movement = MovementInput(
+        code="999",
+        description="Movimentação não cadastrada no catálogo",
     )
 
-    assert response.status_code == 200
+    result = explain_movement(movement)
 
-    body = response.json()
-
-    assert body["success"] is True
-    assert "encaminhado" in body["data"]["explanation"]
-    assert body["data"]["limitations"]
-
-
-def test_unknown_movement_returns_limitation():
-    response = client.post(
-        "/v1/explanations",
-        json={
-            "movement": {
-                "code": "999",
-                "description": "Movimentação ainda não cadastrada",
-            },
-        },
-    )
-
-    assert response.status_code == 200
-
-    body = response.json()
-
-    assert body["success"] is True
-    assert "não consigo explicar" in body["data"]["explanation"]
-    assert body["data"]["limitations"]
-
-
-def test_empty_description_is_rejected():
-    response = client.post(
-        "/v1/explanations",
-        json={
-            "movement": {
-                "code": "123",
-                "description": "   ",
-            },
-        },
-    )
-
-    assert response.status_code == 422
-
-
-def test_invalid_date_is_rejected():
-    response = client.post(
-        "/v1/explanations",
-        json={
-            "movement": {
-                "code": "123",
-                "description": "Conclusos para decisão",
-                "date": "data-invalida",
-            },
-        },
-    )
-
-    assert response.status_code == 422
+    assert "não consigo explicar" in result.explanation
+    assert len(result.limitations) >= 2

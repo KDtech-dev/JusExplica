@@ -1,3 +1,4 @@
+import re
 import unicodedata
 
 from app.schemas.explanation import ExplanationData, MovementInput
@@ -10,102 +11,169 @@ LIMITATION = (
 )
 
 
+UNKNOWN_EXPLANATION = (
+    "Ainda não consigo explicar esta movimentação com segurança "
+    "a partir das regras disponíveis. Consulte a descrição completa "
+    "no sistema do tribunal para obter mais informações."
+)
+
 RULES = [
-    (
-        ("expedicao de mandado",),
-        (
+    {
+        "name": "expedicao_mandado",
+        "phrases": (
+            "expedicao de mandado",
+            "mandado expedido",
+        ),
+        "explanation": (
             "O registro indica que foi emitido um mandado, documento "
             "utilizado para formalizar uma ordem ou providência judicial. "
             "O que deve ser realizado depende do conteúdo do documento."
         ),
-    ),
-    (
-        ("juntada de peticao", "juntada de petição"),
-        (
+    },
+    {
+        "name": "juntada_peticao",
+        "phrases": (
+            "juntada de peticao",
+            "peticao juntada",
+        ),
+        "explanation": (
             "Uma petição foi anexada aos autos do processo. Ela pode conter "
             "um pedido, uma manifestação ou outras informações apresentadas "
             "por uma das partes ou por seu representante."
         ),
-    ),
-    (
-        ("conclusos para decisao", "conclusos para decisão"),
-        (
-            "O processo foi encaminhado ao responsável pela análise judicial "
-            "para apreciação ou decisão. Esse registro, por si só, não "
-            "informa qual será o resultado."
+    },
+    {
+        "name": "conclusos_decisao",
+        "phrases": (
+            "conclusos para decisao",
+            "concluso para decisao",
+            "autos conclusos",
         ),
-    ),
-    (
-        ("citacao", "citação"),
-        (
+        "explanation": (
+            "O processo foi encaminhado para análise judicial. "
+            "Esse registro, por si só, não informa qual será o resultado "
+            "nem quando uma decisão será tomada."
+        ),
+    },
+    {
+        "name": "citacao",
+        "phrases": (
+            "citacao",
+            "citado para",
+            "citada para",
+        ),
+        "explanation": (
             "O registro está relacionado à citação, ato pelo qual uma pessoa "
             "é formalmente chamada para tomar conhecimento de um processo "
             "e, quando cabível, apresentar sua defesa."
         ),
-    ),
-    (
-        ("intimacao", "intimação"),
-        (
+    },
+    {
+        "name": "intimacao",
+        "phrases": (
+            "intimacao",
+            "intimado para",
+            "intimada para",
+        ),
+        "explanation": (
             "O registro indica uma intimação, utilizada para comunicar "
             "uma pessoa sobre um ato ou informação do processo. O conteúdo "
             "da comunicação determina o que precisa ser observado."
         ),
-    ),
-    (
-        ("audiencia designada", "audiência designada"),
-        (
+    },
+    {
+        "name": "audiencia_designada",
+        "phrases": (
+            "audiencia designada",
+            "designada audiencia",
+            "audiencia marcada",
+        ),
+        "explanation": (
             "Foi registrada a designação de uma audiência. Para saber "
             "a data, o horário, a finalidade e quem deve comparecer, "
             "é necessário consultar os detalhes do processo."
         ),
-    ),
-    (
-        ("sentenca", "sentença"),
-        (
-            "O registro menciona uma sentença, decisão judicial que resolve "
-            "determinadas questões do processo. Para compreender o resultado, "
-            "é necessário consultar o conteúdo da sentença."
+    },
+    {
+        "name": "sentenca",
+        "phrases": (
+            "sentenca proferida",
+            "sentenca publicada",
+            "sentenca registrada",
         ),
-    ),
-    (
-        ("certidao", "certidão"),
-        (
+        "explanation": (
+            "O registro indica que há uma sentença associada ao processo. "
+            "Para compreender o resultado, seus efeitos e eventuais "
+            "providências, é necessário consultar o conteúdo da sentença."
+        ),
+    },
+    {
+        "name": "certidao",
+        "phrases": (
+            "certidao expedida",
+            "expedida certidao",
+            "certidao juntada",
+            "certidao emitida",
+        ),
+        "explanation": (
             "O registro está relacionado a uma certidão, documento que "
             "formaliza uma informação ou ocorrência processual. O conteúdo "
             "da certidão esclarece qual fato foi registrado."
         ),
-    ),
+    },
 ]
 
 
 def normalize_text(value: str) -> str:
     normalized = unicodedata.normalize("NFKD", value.casefold())
 
-    return "".join(
+    without_accents = "".join(
         character
         for character in normalized
         if not unicodedata.combining(character)
     )
+    
+    normalized_spaces = re.sub(
+        r"[^\w]+",
+        " ",
+        without_accents,
+    )
+
+    return " ".join(normalized_spaces.split())
+
+
+def classify_movement(description: str) -> dict | None:
+
+    normalized_description = normalize_text(description)
+
+    for rule in RULES:
+        for phrase in rule["phrases"]:
+            normalized_phrase = normalize_text(phrase)
+
+            pattern = (
+                rf"(?<!\w){re.escape(normalized_phrase)}(?!\w)"
+            )
+
+            if re.search(pattern, normalized_description):
+                return rule
+
+    return None
 
 
 def explain_movement(movement: MovementInput) -> ExplanationData:
-    description = normalize_text(movement.description)
+   
+    rule = classify_movement(movement.description)
 
-    for keywords, explanation in RULES:
-        if any(normalize_text(keyword) in description for keyword in keywords):
-            return ExplanationData(
-                explanation=explanation,
-                limitations=[LIMITATION],
-            )
+    if rule is None:
+        return ExplanationData(
+            explanation=UNKNOWN_EXPLANATION,
+            limitations=[
+                "Movimentação não reconhecida pelas regras atuais.",
+                LIMITATION,
+            ],
+        )
 
     return ExplanationData(
-        explanation=(
-            "Ainda não consigo explicar esta movimentação com segurança "
-            "a partir das regras disponíveis. Consulte a descrição completa "
-            "no sistema do tribunal para obter mais informações."
-        ),
-        limitations=[
-            "Movimentação não reconhecida pelas regras atuais.",
-            LIMITATION,
-        ],
+        explanation=rule["explanation"],
+        limitations=[LIMITATION],
     )
