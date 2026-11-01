@@ -1,0 +1,24 @@
+{
+  "name": "jusexplica",
+  "version": "1.0.0",
+  "description": "**JusExplica: a Justiça fala a sua língua!**",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KDtech-dev/JusExplica.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/KDtech-dev/JusExplica/issues"
+  },
+  "homepage": "https://github.com/KDtech-dev/JusExplica#readme"
+}
