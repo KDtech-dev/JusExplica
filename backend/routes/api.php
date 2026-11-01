@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\ExplanationController;
+use App\Http\Controllers\Api\WhatsappController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -11,4 +12,9 @@ Route::get('/user', function (Request $request) {
 Route::post('/explanations', [
     ExplanationController::class,
     'store',
+]);
+
+Route::post('/internal/whatsapp/messages', [
+    WhatsappController::class,
+    'receive',
 ]);
