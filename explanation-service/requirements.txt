@@ -59,3 +59,4 @@ watchfiles==1.3.0
 websockets==17.3
 pytest>=8.3,<9
 zeep>=4.2,<5
+openai>=1.0,<3

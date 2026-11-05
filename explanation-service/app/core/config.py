@@ -1,3 +1,4 @@
+from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -9,6 +10,9 @@ class Settings(BaseSettings):
     )
     service_version: str = "0.2.0"
     api_prefix: str = "/v1"
+    nvidia_api_key: SecretStr = SecretStr("")
+    nvidia_base_url: str
+    nvidia_model: str
 
     model_config = SettingsConfigDict(
         env_file=".env",

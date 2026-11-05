@@ -4,4 +4,8 @@ version = "0.1.0"
 requires-python = ">=3.14"
 dependencies = [
     "fastapi[standard]>=0.162.0",
+    "openai>=1.0,<3",
+    "pydantic-settings>=2,<3",
+    "requests>=2,<3",
+    "zeep>=4.2,<5",
 ]
